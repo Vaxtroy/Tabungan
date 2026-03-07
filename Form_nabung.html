@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tabungan Bersama Diovan & Keysia</title>
+    <style>
+      /* Menggunakan Font System Premium */
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+        box-sizing: border-box;
+        color: #ffffff;
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+        position: relative;
+      }
+
+      /* --- PROGRESS BAR SECTION (Tambahan Baru) --- */
+      .progress-section {
+        margin-bottom: 25px;
+        text-align: center;
+      }
+      .progress-info {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.4);
+        margin-bottom: 8px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+      }
+      .progress-container {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        height: 10px;
+        width: 100%;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      .progress-bar {
+        background: linear-gradient(90deg, #3b82f6, #2563eb);
+        height: 100%;
+        width: 0%;
+        transition: width 1.5s cubic-bezier(0.1, 1, 0.3, 1);
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+      }
+
+      /* --- DESIGN ASLI KAMU (TIDAK BERUBAH) --- */
+      .confetti-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+      }
+      .confetti-item {
+        position: absolute;
+        bottom: -80px;
+        opacity: 0;
+        filter: blur(1px);
+        animation: celebrate 4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+      }
+      .confetti-text {
+        display: inline-block;
+        animation: wiggleItem 3s ease-in-out infinite;
+      }
+      @keyframes wiggleItem {
+        0%,
+        100% {
+          transform: translateX(0) rotate(0deg);
+        }
+        25% {
+          transform: translateX(10px) rotate(5deg);
+        }
+        75% {
+          transform: translateX(-10px) rotate(-5deg);
+        }
+      }
+      .confetti-item:nth-child(odd) {
+        font-size: 36px;
+      }
+      .confetti-item:nth-child(even) {
+        font-size: 28px;
+      }
+      .confetti-item:nth-child(3n) {
+        font-size: 42px;
+      }
+      @keyframes celebrate {
+        0% {
+          transform: translateY(0) scale(0.6);
+          opacity: 0;
+        }
+        10% {
+          opacity: 1;
+          transform: translateY(-50px) scale(1);
+        }
+        100% {
+          transform: translateY(-110vh) scale(0.9);
+          opacity: 0;
+        }
+      }
+
+      .card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(30px) saturate(160%);
+        -webkit-backdrop-filter: blur(30px) saturate(160%);
+        border-radius: 35px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 40px 30px;
+        width: 100%;
+        max-width: 380px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        z-index: 10;
+      }
+      h3 {
+        font-weight: 600;
+        font-size: 1.6rem;
+        margin-bottom: 25px;
+        text-align: center;
+      }
+      .input-group {
+        margin-bottom: 24px;
+      }
+      label {
+        display: block;
+        margin-bottom: 10px;
+        margin-left: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.4);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 16px 20px;
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 18px;
+        font-size: 1rem;
+        color: #ffffff;
+        outline: none;
+        transition: 0.3s;
+        box-sizing: border-box;
+        -webkit-appearance: none;
+      }
+      input:focus,
+      select:focus {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+      }
+      .select-wrapper {
+        position: relative;
+      }
+      .select-wrapper::after {
+        content: "";
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        width: 10px;
+        height: 6px;
+        background-color: rgba(255, 255, 255, 0.4);
+        clip-path: polygon(100% 0%, 0% 0%, 50% 100%);
+        transform: translateY(-50%);
+        pointer-events: none;
+      }
+      option {
+        background-color: #1e293b;
+        color: white;
+        padding: 15px;
+      }
+      button {
+        width: 100%;
+        padding: 18px;
+        margin-top: 10px;
+        background: #007aff;
+        background-image: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        border: none;
+        border-radius: 20px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+        transition: all 0.3s ease;
+      }
+      button:active {
+        transform: scale(0.96);
+      }
+      button:disabled {
+        opacity: 0.6;
+      }
+      .footer-info {
+        margin-top: 30px;
+        text-align: center;
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.3);
+        font-weight: 500;
+      }
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="confetti-container" id="confettiContainer"></div>
+
+    <div class="card">
+      <div class="progress-section">
+        <div class="progress-info">
+          <span id="labelTotal">Rp 0</span>
+          <span id="labelPercent">0%</span>
+        </div>
+        <div class="progress-container">
+          <div id="bar" class="progress-bar"></div>
+        </div>
+      </div>
+
+      <h3>💰 Tabungan Kita</h3>
+      <form id="tabunganForm">
+        <div class="input-group">
+          <label>Pilih Penabung</label>
+          <div class="select-wrapper">
+            <select id="nama" required>
+              <option value="">Pilih Nama...</option>
+              <option value="Diovan">Diovan</option>
+              <option value="Keysia">Keysia</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label>Nominal Tabungan</label>
+          <input
+            type="text"
+            id="jumlahDisplay"
+            inputmode="numeric"
+            placeholder="Contoh: 25.000"
+            required
+          />
+          <input type="hidden" id="jumlah" name="jumlah" />
+        </div>
+
+        <div class="input-group">
+          <label>Tanggal Transaksi</label>
+          <input type="date" id="tgl_nabung" required />
+        </div>
+
+        <button type="submit" id="btnSubmit">Simpan Catatan</button>
+      </form>
+      <div class="footer-info">Target Bersama: Rp5.000.000</div>
+    </div>
+
+    <script>
+      const scriptURL =
+        "https://script.google.com/macros/s/AKfycbxIzSt6-MASq_SBzuPX9QctxKja89Yl1kXLyw619zyCnWVwm3KYJABGLYfP-rRf2XXYOA/exec";
+      const targetGoal = 5000000;
+
+      // 1. FORMAT TITIK (RINGAN & RESPONSIF)
+      const inputDisp = document.getElementById("jumlahDisplay");
+      const inputReal = document.getElementById("jumlah");
+      inputDisp.addEventListener("input", function (e) {
+        let val = e.target.value.replace(/\D/g, "");
+        inputReal.value = val;
+        if (val) {
+          e.target.value = Number(val).toLocaleString("id-ID");
+        }
+      });
+
+      // 2. LOGIKA PROGRESS BAR
+      async function updateUI() {
+        try {
+          const res = await fetch(scriptURL);
+          const data = await res.json();
+          const total = data.total || 0;
+          const percent = Math.min((total / targetGoal) * 100, 100).toFixed(1);
+          document.getElementById("bar").style.width = percent + "%";
+          document.getElementById("labelPercent").innerText = percent + "%";
+          document.getElementById("labelTotal").innerText =
+            "Rp " + total.toLocaleString("id-ID");
+        } catch (e) {
+          console.log("Gagal memuat saldo");
+        }
+      }
+
+      // 3. EFEK CONFETTI (ASLI)
+      function createCelebrationEffect() {
+        const container = document.getElementById("confettiContainer");
+        const emojis = [
+          { text: "💖", shadow: "0 5px 15px rgba(255, 117, 143, 0.7)" },
+          { text: "💙", shadow: "0 5px 15px rgba(59, 130, 246, 0.7)" },
+          { text: "💰", shadow: "0 5px 18px rgba(241, 196, 15, 0.7)" },
+          { text: "💸", shadow: "0 5px 18px rgba(46, 204, 113, 0.6)" },
+          { text: "✨", shadow: "0 5px 20px rgba(255, 255, 255, 0.9)" },
+          { text: "🏠", shadow: "0 5px 15px rgba(230, 126, 34, 0.6)" },
+        ];
+        for (let i = 0; i < 25; i++) {
+          const confetti = document.createElement("div");
+          confetti.className = "confetti-item";
+          const data = emojis[Math.floor(Math.random() * emojis.length)];
+          confetti.innerHTML = `<span class="confetti-text">${data.text}</span>`;
+          confetti.style.textShadow = data.shadow;
+          confetti.style.left = Math.random() * 100 + "vw";
+          confetti.style.animationDelay = Math.random() * 2 + "s";
+          container.appendChild(confetti);
+          setTimeout(() => confetti.remove(), 7000);
+        }
+      }
+
+      window.onload = function () {
+        updateUI();
+        createCelebrationEffect();
+        document.getElementById("tgl_nabung").value = new Date()
+          .toISOString()
+          .split("T")[0];
+      };
+
+      const form = document.getElementById("tabunganForm");
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("btnSubmit");
+        btn.disabled = true;
+        btn.innerText = "Mengirim...";
+        const fd = new URLSearchParams();
+        fd.append("nama", document.getElementById("nama").value);
+        fd.append("jumlah", inputReal.value);
+        fd.append("tgl_nabung", document.getElementById("tgl_nabung").value);
+        fetch(scriptURL, { method: "POST", mode: "no-cors", body: fd })
+          .then(() => {
+            alert("Berhasil dicatat! ✨");
+            location.reload();
+          })
+          .catch(() => {
+            alert("Koneksi bermasalah.");
+            btn.disabled = false;
+          });
+      });
+    </script>
+  </body>
+</html>
