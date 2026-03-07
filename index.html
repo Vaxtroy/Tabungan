@@ -256,6 +256,7 @@
             type="text"
             id="jumlahDisplay"
             inputmode="numeric"
+            min="1000"
             placeholder="Contoh: 25.000"
             required
           />
@@ -281,18 +282,34 @@
         "https://script.google.com/macros/s/AKfycbxIzSt6-MASq_SBzuPX9QctxKja89Yl1kXLyw619zyCnWVwm3KYJABGLYfP-rRf2XXYOA/exec";
       const targetGoal = 5000000;
 
-      // 1. FORMAT TITIK (RINGAN & RESPONSIF)
+      // 1. FORMAT TITIK
       const inputDisp = document.getElementById("jumlahDisplay");
       const inputReal = document.getElementById("jumlah");
+
       inputDisp.addEventListener("input", function (e) {
         let val = e.target.value.replace(/\D/g, "");
-        inputReal.value = val;
+        inputReal.value = val; // Pastikan nilai angka murni tersimpan di input hidden
         if (val) {
           e.target.value = Number(val).toLocaleString("id-ID");
         }
       });
 
-      // 2. LOGIKA PROGRESS BAR
+      // 2. FUNGSI DETEKSI HARI
+      function dapatkanNamaHari(dateString) {
+        const tanggal = new Date(dateString);
+        const daftarHari = [
+          "Minggu",
+          "Senin",
+          "Selasa",
+          "Rabu",
+          "Kamis",
+          "Jumat",
+          "Sabtu",
+        ];
+        return daftarHari[tanggal.getDay()];
+      }
+
+      // 3. UPDATE PROGRESS BAR
       async function updateUI() {
         try {
           const res = await fetch(scriptURL);
@@ -308,7 +325,7 @@
         }
       }
 
-      // 3. EFEK CONFETTI (ASLI)
+      // 4. EFEK CONFETTI
       function createCelebrationEffect() {
         const container = document.getElementById("confettiContainer");
         const emojis = [
@@ -321,7 +338,7 @@
           { text: "🧧", shadow: "0 5px 15px rgba(192, 57, 43, 0.8)" },
           { text: "🌸", shadow: "0 5px 15px rgba(255, 182, 193, 0.7)" },
         ];
-        for (let i = 0; i < 25; i++) {
+        for (let i = 0; i < 20; i++) {
           const confetti = document.createElement("div");
           confetti.className = "confetti-item";
           const data = emojis[Math.floor(Math.random() * emojis.length)];
@@ -342,28 +359,48 @@
           .split("T")[0];
       };
 
+      // 5. SUBMIT FORM (Perbaikan variabel 'real' menjadi 'inputReal')
       const form = document.getElementById("tabunganForm");
       form.addEventListener("submit", (e) => {
         e.preventDefault();
+
+        // Ambil nilai dari input hidden (angka murni)
+        const nominalAngka = parseInt(inputReal.value);
+
+        // VALIDASI MINIMAL 1000
+        if (nominalAngka < 1000) {
+          alert("Maaf, minimal menabung adalah Rp 1.000 ya! Semangat!");
+          return; // Berhenti di sini, tidak jadi mengirim data
+        }
+
         const btn = document.getElementById("btnSubmit");
         btn.disabled = true;
-        btn.innerText = "Mengirim...";
-        const fd = new URLSearchParams();
-        fd.append("nama", document.getElementById("nama").value);
-        fd.append("jumlah", inputReal.value);
-        fd.append("tgl_nabung", document.getElementById("tgl_nabung").value);
-        fetch(scriptURL, { method: "POST", mode: "no-cors", body: fd })
+        btn.innerText = "Mencatat...";
+
+        const tanggalInput = document.getElementById("tgl_nabung").value;
+        const hari = dapatkanNamaHari(tanggalInput);
+
+        const formData = new URLSearchParams();
+        formData.append("nama", document.getElementById("nama").value);
+        formData.append("jumlah", inputReal.value);
+        formData.append("tgl_nabung", tanggalInput);
+        formData.append("hari", hari);
+
+        fetch(scriptURL, {
+          method: "POST",
+          mode: "no-cors",
+          body: formData,
+        })
           .then(() => {
-            alert("Berhasil dicatat! ✨");
+            alert("Berhasil dicatat! Hari " + hari + " ini kamu hebat! ✨");
             location.reload();
           })
           .catch(() => {
             alert("Koneksi bermasalah.");
             btn.disabled = false;
+            btn.innerText = "Simpan Catatan";
           });
       });
     </script>
   </body>
 </html>
-
-
