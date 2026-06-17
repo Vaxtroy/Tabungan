@@ -24,24 +24,52 @@
         position: relative;
       }
 
-      /* --- PROGRESS BAR SECTION (Tambahan Baru) --- */
+      /* --- PROGRESS & SALDO SECTION --- */
       .progress-section {
         margin-bottom: 25px;
-        text-align: center;
+        text-align: left;
+        background: rgba(255, 255, 255, 0.03);
+        padding: 15px;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
       }
+      .saldo-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+        font-weight: 500;
+      }
+      .saldo-row.pemasukan {
+        color: #4ade80;
+      } /* Hijau */
+      .saldo-row.pengambilan {
+        color: #f87171;
+      } /* Merah */
+      .saldo-row.akhir {
+        font-size: 1.05rem;
+        font-weight: 700;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 8px;
+        margin-top: 4px;
+        color: #3b82f6; /* Biru */
+      }
+
       .progress-info {
         display: flex;
         justify-content: space-between;
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         color: rgba(255, 255, 255, 0.4);
-        margin-bottom: 8px;
+        margin-top: 10px;
+        margin-bottom: 4px;
         font-weight: 600;
         letter-spacing: 0.5px;
+        text-transform: uppercase;
       }
       .progress-container {
         background: rgba(255, 255, 255, 0.1);
         border-radius: 20px;
-        height: 10px;
+        height: 8px;
         width: 100%;
         overflow: hidden;
         border: 1px solid rgba(255, 255, 255, 0.05);
@@ -229,8 +257,21 @@
 
     <div class="card">
       <div class="progress-section">
-        <div class="progress-info">
+        <div class="saldo-row pemasukan">
+          <span>📈 Total Pemasukan:</span>
           <span id="labelTotal">Rp 0</span>
+        </div>
+        <div class="saldo-row pengambilan">
+          <span>📉 Total Pengambilan:</span>
+          <span id="labelSpending">Rp 0</span>
+        </div>
+        <div class="saldo-row akhir">
+          <span>💰 Jumlah Akhir:</span>
+          <span id="labelAkhir">Rp 0</span>
+        </div>
+
+        <div class="progress-info">
+          <span>Progres Target Bersama</span>
           <span id="labelPercent">0%</span>
         </div>
         <div class="progress-container">
@@ -238,6 +279,7 @@
         </div>
       </div>
 
+      <h3>💰 Tabungan Kita</h3>
       <form id="tabunganForm">
         <div class="input-group">
           <label>Pilih Penabung</label>
@@ -251,12 +293,21 @@
         </div>
 
         <div class="input-group">
+          <label>Aksi Transaksi</label>
+          <div class="select-wrapper">
+            <select id="tipeTransaksi" required>
+              <option value="masuk" selected>Simpan Uang (＋)</option>
+              <option value="keluar">Ambil Uang (－)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="input-group">
           <label>Nominal Tabungan</label>
           <input
             type="text"
             id="jumlahDisplay"
             inputmode="numeric"
-            min="1000"
             placeholder="Contoh: 25.000"
             required
           />
@@ -279,7 +330,7 @@
 
     <script>
       const scriptURL =
-        "https://script.google.com/macros/s/AKfycbxIzSt6-MASq_SBzuPX9QctxKja89Yl1kXLyw619zyCnWVwm3KYJABGLYfP-rRf2XXYOA/exec";
+        "https://script.google.com/macros/s/AKfycbyd1avZIc77uNS7Ms2aYvdjV394Pa2RB2xnCz49SGUa_lHm6VsJSZS4w-cU6g19afjNDg/exec";
       const targetGoal = 5000000;
 
       // 1. FORMAT TITIK
@@ -288,7 +339,7 @@
 
       inputDisp.addEventListener("input", function (e) {
         let val = e.target.value.replace(/\D/g, "");
-        inputReal.value = val; // Pastikan nilai angka murni tersimpan di input hidden
+        inputReal.value = val;
         if (val) {
           e.target.value = Number(val).toLocaleString("id-ID");
         }
@@ -309,19 +360,32 @@
         return daftarHari[tanggal.getDay()];
       }
 
-      // 3. UPDATE PROGRESS BAR
+      // 3. UPDATE UI (TIGA BARIS INFO SALDO)
       async function updateUI() {
         try {
           const res = await fetch(scriptURL);
           const data = await res.json();
-          const total = data.total || 0;
-          const percent = Math.min((total / targetGoal) * 100, 100).toFixed(1);
+
+          const totalIn = data.total_pemasukan || 0;
+          const totalOut = data.total_pengambilan || 0;
+          const sisaAkhir = data.jumlah_akhir || 0;
+
+          // Hitung persen berdasarkan Jumlah Akhir sisa saldo
+          const percent = Math.min((sisaAkhir / targetGoal) * 100, 100).toFixed(
+            1,
+          );
+
           document.getElementById("bar").style.width = percent + "%";
           document.getElementById("labelPercent").innerText = percent + "%";
+
           document.getElementById("labelTotal").innerText =
-            "Rp " + total.toLocaleString("id-ID");
+            "Rp " + totalIn.toLocaleString("id-ID");
+          document.getElementById("labelSpending").innerText =
+            "Rp " + totalOut.toLocaleString("id-ID");
+          document.getElementById("labelAkhir").innerText =
+            "Rp " + sisaAkhir.toLocaleString("id-ID");
         } catch (e) {
-          console.log("Gagal memuat saldo");
+          console.log("Gagal memuat data saldo");
         }
       }
 
@@ -354,23 +418,29 @@
       window.onload = function () {
         updateUI();
         createCelebrationEffect();
-        document.getElementById("tgl_nabung").value = new Date()
-          .toISOString()
-          .split("T")[0];
+
+        // Format tanggal mengikuti zona waktu Indonesia (WIB)
+        const opsiWaktu = {
+          timeZone: "Asia/Jakarta",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        };
+        const formatter = new Intl.DateTimeFormat("fr-CA", opsiWaktu); // 'fr-CA' menghasilkan format YYYY-MM-DD
+        const tanggalWIB = formatter.format(new Date());
+
+        document.getElementById("tgl_nabung").value = tanggalWIB;
       };
 
-      // 5. SUBMIT FORM (Perbaikan variabel 'real' menjadi 'inputReal')
+      // 5. SUBMIT FORM
       const form = document.getElementById("tabunganForm");
       form.addEventListener("submit", (e) => {
         e.preventDefault();
-
-        // Ambil nilai dari input hidden (angka murni)
         const nominalAngka = parseInt(inputReal.value);
 
-        // VALIDASI MINIMAL 1000
         if (nominalAngka < 1000) {
-          alert("Maaf, minimal menabung adalah Rp 1.000 ya! Semangat!");
-          return; // Berhenti di sini, tidak jadi mengirim data
+          alert("Maaf, minimal nominal transaksi adalah Rp 1.000 ya!");
+          return;
         }
 
         const btn = document.getElementById("btnSubmit");
@@ -379,9 +449,11 @@
 
         const tanggalInput = document.getElementById("tgl_nabung").value;
         const hari = dapatkanNamaHari(tanggalInput);
+        const tipe = document.getElementById("tipeTransaksi").value;
 
         const formData = new URLSearchParams();
         formData.append("nama", document.getElementById("nama").value);
+        formData.append("tipe_transaksi", tipe);
         formData.append("jumlah", inputReal.value);
         formData.append("tgl_nabung", tanggalInput);
         formData.append("hari", hari);
@@ -392,7 +464,7 @@
           body: formData,
         })
           .then(() => {
-            alert("Berhasil dicatat! Hari " + hari + " ini kamu hebat! ✨");
+            alert("Catatan transaksi berhasil diperbarui! ✨");
             location.reload();
           })
           .catch(() => {
