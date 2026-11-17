@@ -24,7 +24,7 @@
         position: relative;
       }
 
-      /* --- PROGRESS & SALDO MINIMALIS --- */
+      /* --- PROGRESS & SALDO MINIMALIS (DIPERBAIKI) --- */
       .progress-section {
         margin-bottom: 25px;
         text-align: left;
@@ -33,12 +33,29 @@
         border-radius: 20px;
         border: 1px solid rgba(255, 255, 255, 0.05);
       }
-      .saldo-row.akhir {
+
+      .saldo-header {
         display: flex;
-        justify-content: space-between;
-        font-size: 1.15rem;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .saldo-label {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.5);
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+      }
+
+      .saldo-nominal {
+        font-size: clamp(1.45rem, 6vw, 1.85rem);
         font-weight: 700;
         color: #3b82f6;
+        letter-spacing: -0.5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .progress-info {
@@ -46,7 +63,7 @@
         justify-content: space-between;
         font-size: 0.7rem;
         color: rgba(255, 255, 255, 0.4);
-        margin-top: 14px;
+        margin-top: 16px;
         margin-bottom: 6px;
         font-weight: 600;
         letter-spacing: 0.5px;
@@ -131,7 +148,7 @@
         -webkit-backdrop-filter: blur(30px) saturate(160%);
         border-radius: 35px;
         border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 40px 30px;
+        padding: 35px 26px;
         width: 100%;
         max-width: 380px;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
@@ -146,11 +163,11 @@
         text-align: center;
       }
       .input-group {
-        margin-bottom: 24px;
+        margin-bottom: 20px;
       }
       label {
         display: block;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
         margin-left: 6px;
         font-size: 0.75rem;
         font-weight: 600;
@@ -161,7 +178,7 @@
       input,
       select {
         width: 100%;
-        padding: 16px 20px;
+        padding: 15px 18px;
         background: rgba(255, 255, 255, 0.07);
         border: 1px solid rgba(255, 255, 255, 0.05);
         border-radius: 18px;
@@ -171,6 +188,9 @@
         transition: 0.3s;
         box-sizing: border-box;
         -webkit-appearance: none;
+      }
+      input::placeholder {
+        color: rgba(255, 255, 255, 0.25);
       }
       input:focus,
       select:focus {
@@ -207,7 +227,7 @@
         color: white;
         border: none;
         border-radius: 20px;
-        font-size: 1.1rem;
+        font-size: 1.05rem;
         font-weight: 600;
         cursor: pointer;
         box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
@@ -244,9 +264,9 @@
     <div class="card">
       <!-- INFO HASIL AKHIR SALDO BERSIH -->
       <div class="progress-section">
-        <div class="saldo-row akhir">
-          <span>💰 Jumlah Akhir:</span>
-          <span id="labelAkhir">Rp 0</span>
+        <div class="saldo-header">
+          <span class="saldo-label">Jumlah Akhir</span>
+          <span class="saldo-nominal" id="labelAkhir">Rp 0</span>
         </div>
 
         <div class="progress-info">
@@ -259,7 +279,7 @@
       </div>
 
       <form id="tabunganForm">
-        <!-- PILIHAN PENABUNG / PENGAMBIL KEMBALI DISEDIAKAN -->
+        <!-- PILIHAN PENABUNG / PENGAMBIL -->
         <div class="input-group">
           <label>Pilih Orang</label>
           <div class="select-wrapper">
@@ -293,6 +313,17 @@
           <input type="hidden" id="jumlah" name="jumlah" />
         </div>
 
+        <!-- INPUT BARU: KATEGORI / KEPERLUAN -->
+        <div class="input-group">
+          <label>Kategori / Keperluan</label>
+          <input
+            type="text"
+            id="kategori"
+            placeholder="Contoh: Liburan, Dana Darurat, Makan..."
+            required
+          />
+        </div>
+
         <div class="input-group">
           <label>Tanggal Transaksi</label>
           <input type="date" id="tgl_nabung" required />
@@ -309,7 +340,7 @@
 
     <script>
       const scriptURL =
-        "https://script.google.com/macros/s/AKfycbyaZ4HkVBo2cBBMBN_BSWNJB9pq-Pqjm1cQ3TX1ucaSE4g56GCZLeJZlBpOVWHS9qIVng/exec";
+        "https://script.google.com/macros/s/AKfycbxIoZr3Mf7zgPvGMPZ4qQaDOxu9hmie9eW2chfAaIg3FfjhPFNpfPWAOtFktV0kitVSGg/exec";
       const targetGoal = 5000000;
 
       // 1. FORMAT TITIK
@@ -402,7 +433,7 @@
         );
       };
 
-      // 5. SUBMIT FORM (MENGIRIM PARAMETER NAMA KEMBALI)
+      // 5. SUBMIT FORM (DENGAN PARAMETER KATEGORI)
       const form = document.getElementById("tabunganForm");
       form.addEventListener("submit", (e) => {
         e.preventDefault();
@@ -422,9 +453,13 @@
         const tipe = document.getElementById("tipeTransaksi").value;
 
         const formData = new URLSearchParams();
-        formData.append("nama", document.getElementById("nama").value); // Mengirim nama pilihan
+        formData.append("nama", document.getElementById("nama").value);
         formData.append("tipe_transaksi", tipe);
         formData.append("jumlah", inputReal.value);
+        formData.append(
+          "kategori",
+          document.getElementById("kategori").value.trim(),
+        );
         formData.append("tgl_nabung", tanggalInput);
         formData.append("hari", hari);
 
